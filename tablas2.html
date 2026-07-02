@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Tablas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f7ff;
+      text-align: center;
+      padding: 25px;
+    }
+
+    .card {
+      background: white;
+      max-width: 480px;
+      margin: auto;
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 4px 15px #ccc;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .operacion {
+      font-size: 55px;
+      font-weight: bold;
+      margin: 25px 0;
+    }
+
+    .opciones button {
+      display: block;
+      width: 80%;
+      margin: 10px auto;
+      padding: 14px;
+      font-size: 24px;
+      border-radius: 12px;
+      border: 2px solid #aaa;
+      cursor: pointer;
+      background: #f8f8f8;
+    }
+
+    .opciones button:hover {
+      background: #e8f0ff;
+    }
+
+    .correcta {
+      background: #b8f7b8 !important;
+      border-color: green !important;
+    }
+
+    .incorrecta {
+      background: #ffb8b8 !important;
+      border-color: red !important;
+    }
+
+    #mensaje {
+      font-size: 24px;
+      font-weight: bold;
+      min-height: 35px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .resultado {
+      font-size: 22px;
+      line-height: 1.6;
+    }
+
+    #tiempo{
+        font-size:32px;
+        font-weight:bold;
+        margin:15px 0;
+        color:#0066cc;
+    }
+
+    #contenedorBarra{
+        width:100%;
+        height:28px;
+        background:#ddd;
+        border-radius:15px;
+        overflow:hidden;
+        margin:15px 0;
+    }
+
+    #barraTiempo{
+        width:100%;
+        height:100%;
+        background:limegreen;
+        transition:width 1s linear, background .5s;
+    }
+
+.peligro{
+    color:red !important;
+}
+
+.urgente{
+    animation:pulsar .5s infinite alternate;
+}
+
+@keyframes pulsar{
+    from{
+        transform:scaleY(1);
+    }
+    to{
+        transform:scaleY(1.15);
+    }
+}
+
+.titulo{
+    animation:rebote 1.5s infinite;
+    margin-top:5px;
+    margin-bottom:20px;
+
+    font-size:42px;
+    font-weight:bold;
+
+    background:linear-gradient(
+        90deg,
+        #ff4d4d,
+        #ff9800,
+        #ffd600,
+        #4caf50,
+        #2196f3,
+        #673ab7
+    );
+
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+
+    text-shadow:2px 2px 8px rgba(0,0,0,.15);
+
+    letter-spacing:2px;
+}
+@keyframes rebote{
+
+    0%{
+
+        transform:translateY(0px);
+
+    }
+
+    50%{
+
+        transform:translateY(-6px);
+
+    }
+
+    100%{
+
+        transform:translateY(0px);
+
+    }
+
+}
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1 class="titulo">Tablas de Multiplicar para Valentina Chon ❤️</h1>
+
+    <p>Pregunta <span id="actual">1</span> de <span id="total">10</span></p>
+
+    <div id="contenedorBarra">
+        <div id="barraTiempo"></div>
+    </div>
+
+    <div id="tiempo">⏳ 20 s</div>
+
+    <div class="operacion" id="operacion"></div>
+
+    <div class="opciones" id="opciones"></div>
+
+    <p id="mensaje"></p>
+
+    <button class="btn" id="btnSiguiente" onclick="siguiente()" style="display:none;">
+      Siguiente
+    </button>
+
+    <button class="btn" id="btnReiniciar" onclick="reiniciar()" style="display:none;">Reiniciar</button>
+  </div>
+
+  <script>
+    const totalPreguntas = 10;
+
+    let preguntaActual = 1;
+    let correctas = 0;
+    let numero1 = 0;
+    let numero2 = 0;
+    let respuestaCorrecta = 0;
+    let yaRespondio = false;
+    let tiempo = 20;
+    let temporizador = null;
+
+    document.getElementById("total").textContent = totalPreguntas;
+
+    function generarNumero(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function mezclar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function generarOpciones(correcta) {
+      let opciones = [correcta];
+
+      while (opciones.length < 5) {
+        let falsa = correcta + generarNumero(-20, 20);
+
+        if (falsa < 0) falsa = generarNumero(1, 100);
+
+        if (!opciones.includes(falsa) && falsa !== correcta) {
+          opciones.push(falsa);
+        }
+      }
+
+      return mezclar(opciones);
+    }
+
+    function nuevaPregunta() {
+      yaRespondio = false;
+
+      numero1 = generarNumero(1, 5);
+      numero2 = generarNumero(2, 5);
+      respuestaCorrecta = numero1 * numero2;
+
+      document.getElementById("actual").textContent = preguntaActual;
+      document.getElementById("operacion").textContent = numero1 + " × " + numero2;
+      document.getElementById("mensaje").textContent = "";
+      document.getElementById("btnSiguiente").style.display = "none";
+
+      const opcionesDiv = document.getElementById("opciones");
+      opcionesDiv.innerHTML = "";
+
+      const opciones = generarOpciones(respuestaCorrecta);
+
+      opciones.forEach(opcion => {
+        const boton = document.createElement("button");
+        boton.textContent = opcion;
+        boton.onclick = function() {
+          responder(boton, opcion);
+        };
+        opcionesDiv.appendChild(boton);
+      });
+
+      iniciarTemporizador();
+    }
+
+    function responder(botonSeleccionado, valor) {
+      
+      if (yaRespondio) return;
+
+      clearInterval(temporizador);
+
+      yaRespondio = true;
+
+      const botones = document.querySelectorAll("#opciones button");
+
+      botones.forEach(boton => {
+        boton.disabled = true;
+
+        if (Number(boton.textContent) === respuestaCorrecta) {
+          boton.classList.add("correcta");
+        }
+      });
+
+      if (valor === respuestaCorrecta) {
+        correctas++;
+        document.getElementById("mensaje").textContent = "✅ Correcto";
+      } else {
+        botonSeleccionado.classList.add("incorrecta");
+        document.getElementById("mensaje").textContent =
+          "❌ Incorrecto. La respuesta era " + respuestaCorrecta;
+      }
+
+      if (preguntaActual < totalPreguntas) {
+        document.getElementById("btnSiguiente").style.display = "inline-block";
+      } else {
+        document.getElementById("btnReiniciar").style.display = "inline-block";
+        mostrarResultadoFinal();
+      }
+    }
+
+    function siguiente() {
+      preguntaActual++;
+      nuevaPregunta();
+    }
+
+    function mostrarResultadoFinal() {
+      const nota = (correctas / totalPreguntas) * 20;
+
+      document.getElementById("btnSiguiente").style.display = "none";
+
+      document.getElementById("mensaje").innerHTML = `
+        <div class="resultado">
+          Resultado final:<br>
+          Acertaste ${correctas} de ${totalPreguntas}<br>
+          Nota: ${nota.toFixed(1)} / 20
+        </div>
+      `;
+    }
+
+    function reiniciar() {
+      preguntaActual = 1;
+      correctas = 0;
+      nuevaPregunta();
+      document.getElementById("btnReiniciar").style.display = "none";
+    }
+
+    function iniciarTemporizador(){
+
+        clearInterval(temporizador);
+
+        tiempo = 20;        
+
+        const lbl = document.getElementById("tiempo");
+
+        const barra = document.getElementById("barraTiempo");
+
+        barra.style.width = "100%";
+        barra.style.background = "limegreen";
+        barra.classList.remove("urgente");
+
+        lbl.textContent = "⏳ " + tiempo;
+        lbl.classList.remove("peligro");
+
+        temporizador = setInterval(function(){
+
+            tiempo--;
+
+            lbl.textContent = "⏳ " + tiempo;
+
+            let porcentaje = (tiempo / 20) * 100;
+
+            barra.style.width = porcentaje + "%";
+
+            if (porcentaje <= 60) {
+                barra.style.background = "orange";
+            }
+
+            if (porcentaje <= 25) {
+                barra.style.background = "red";
+            }
+
+            if(tiempo <= 5){
+                lbl.classList.add("peligro");
+                barra.classList.add("urgente");
+            }
+
+            if(tiempo <= 0){
+
+                clearInterval(temporizador);
+
+                if(!yaRespondio){
+
+                    yaRespondio = true;
+
+                    const botones = document.querySelectorAll("#opciones button");
+
+                    botones.forEach(boton=>{
+
+                        boton.disabled = true;
+
+                        if(Number(boton.textContent)==respuestaCorrecta){
+                            boton.classList.add("correcta");
+                        }
+
+                    });
+
+                    document.getElementById("mensaje").textContent =
+                    "⏰ Tiempo agotado. La respuesta era " + respuestaCorrecta;
+
+                    if(preguntaActual < totalPreguntas){
+                        document.getElementById("btnSiguiente").style.display="inline-block";
+                    }else{
+                        document.getElementById("btnReiniciar").style.display="inline-block";
+                        mostrarResultadoFinal();
+                    }
+
+                }
+
+            }
+
+        },1000);
+
+    }
+
+    nuevaPregunta();
+  </script>
+
+</body>
+</html>
