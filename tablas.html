@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Práctica de Tablas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 30px;
+      background: #f5f7fb;
+    }
+
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      max-width: 420px;
+      margin: auto;
+      box-shadow: 0 4px 12px #ccc;
+    }
+
+    .operacion {
+      font-size: 48px;
+      margin: 20px;
+      font-weight: bold;
+    }
+
+    input {
+      font-size: 28px;
+      width: 120px;
+      text-align: center;
+      padding: 8px;
+    }
+
+    button {
+      font-size: 18px;
+      padding: 10px 18px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    .correcto {
+      color: green;
+      font-weight: bold;
+      font-size: 24px;
+    }
+
+    .incorrecto {
+      color: red;
+      font-weight: bold;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Tablas de multiplicar</h1>
+
+    <p>Pregunta <span id="actual">1</span> de <span id="total">10</span></p>
+
+    <div class="operacion" id="operacion"></div>
+
+    <input type="number" id="respuesta" autofocus>
+    <br>
+
+    <button id="btnResponder" onclick="verificar()">Responder</button>
+    <button id="btnSiguiente" onclick="siguiente()" style="display:none;">Siguiente</button>
+
+    <p id="mensaje"></p>
+
+    <button id="btnReiniciar" onclick="reiniciar()" style="display:none;">Reiniciar</button>
+  </div>
+
+  <script>
+    const totalPreguntas = 10;
+    let preguntaActual = 1;
+    let correctas = 0;
+    let numero1, numero2;
+    let yaRespondio = false;
+
+    document.getElementById("total").textContent = totalPreguntas;
+
+    function nuevaPregunta() {
+      numero1 = Math.floor(Math.random() * 10) + 1;
+      numero2 = Math.floor(Math.random() * 10) + 1;
+      yaRespondio = false;
+
+      document.getElementById("operacion").textContent = numero1 + " × " + numero2;
+      document.getElementById("respuesta").value = "";
+      document.getElementById("respuesta").disabled = false;
+      document.getElementById("respuesta").focus();
+
+      document.getElementById("mensaje").textContent = "";
+      document.getElementById("mensaje").className = "";
+
+      document.getElementById("actual").textContent = preguntaActual;
+      document.getElementById("btnResponder").style.display = "inline-block";
+      document.getElementById("btnSiguiente").style.display = "none";
+    }
+
+    function verificar() {
+      if (yaRespondio) return;
+
+      const respuesta = Number(document.getElementById("respuesta").value);
+      const resultadoCorrecto = numero1 * numero2;
+      const mensaje = document.getElementById("mensaje");
+
+      yaRespondio = true;
+      document.getElementById("respuesta").disabled = true;
+
+      if (respuesta === resultadoCorrecto) {
+        correctas++;
+        mensaje.textContent = "✅ Correcto";
+        mensaje.className = "correcto";
+      } else {
+        mensaje.textContent = "❌ Incorrecto. La respuesta correcta era " + resultadoCorrecto;
+        mensaje.className = "incorrecto";
+      }
+
+      document.getElementById("btnResponder").style.display = "none";
+
+      if (preguntaActual < totalPreguntas) {
+        document.getElementById("btnSiguiente").style.display = "inline-block";
+      } else {
+        document.getElementById("btnReiniciar").style.display = "inline-block";        
+        mostrarResultadoFinal();
+      }
+    }
+
+    function siguiente() {
+      preguntaActual++;
+      nuevaPregunta();
+    }
+
+    function mostrarResultadoFinal() {
+      const mensaje = document.getElementById("mensaje");
+      const nota = (correctas / totalPreguntas) * 20;
+
+      mensaje.innerHTML += `
+        <br><br>
+        Resultado final:<br>
+        Acertaste ${correctas} de ${totalPreguntas}<br>
+        Nota: ${nota.toFixed(1)} / 20
+      `;
+
+      document.getElementById("btnSiguiente").style.display = "none";
+    }
+
+    function reiniciar() {
+      preguntaActual = 1;
+      correctas = 0;
+      nuevaPregunta();
+      document.getElementById("btnReiniciar").style.display = "none";    
+    }
+
+    document.getElementById("respuesta").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        if (!yaRespondio) {
+          verificar();
+        } else if (preguntaActual < totalPreguntas) {
+          siguiente();
+        }
+      }
+    });
+
+    nuevaPregunta();
+  </script>
+
+</body>
+</html>
