@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Globos de Multiplicación</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(#87ceeb, #fff8dc);
+      overflow: hidden;
+      text-align: center;
+    }
+
+    .panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      padding: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.25);
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 5px;
+      color: #ff6f00;
+      font-size: 30px;
+    }
+
+    .operacion {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 8px;
+      color: #333;
+    }
+
+    .info {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    #zonaJuego {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: 170px;
+      box-sizing: border-box;
+    }
+
+    .globo {
+      position: absolute;
+      bottom: -120px;
+      width: 85px;
+      height: 105px;
+      border-radius: 50% 50% 45% 45%;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: inset -8px -12px 18px rgba(0,0,0,.2),
+                  0 5px 10px rgba(0,0,0,.25);
+      user-select: none;
+    }
+
+    .globo::after {
+      content: "";
+      position: absolute;
+      bottom: -24px;
+      width: 2px;
+      height: 28px;
+      background: #555;
+    }
+
+    .rojo { background: #f44336; }
+    .azul { background: #2196f3; }
+    .verde { background: #4caf50; }
+    .morado { background: #9c27b0; }
+    .naranja { background: #ff9800; }
+
+    .mensaje {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 15px 25px;
+      border-radius: 18px;
+      font-size: 26px;
+      font-weight: bold;
+      box-shadow: 0 3px 10px rgba(0,0,0,.25);
+      z-index: 20;
+      min-width: 280px;
+    }
+
+    .explosion {
+      position: absolute;
+      font-size: 60px;
+      animation: explotar .5s forwards;
+      pointer-events: none;
+    }
+
+    @keyframes explotar {
+      from {
+        transform: scale(.5);
+        opacity: 1;
+      }
+      to {
+        transform: scale(1.8);
+        opacity: 0;
+      }
+    }
+
+    .pantallaFinal {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 50;
+      padding: 20px;
+    }
+
+    .pantallaFinal h2 {
+      font-size: 42px;
+      color: #ff6f00;
+    }
+
+    .pantallaFinal p {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 14px 24px;
+      font-size: 20px;
+      border-radius: 14px;
+      border: none;
+      background: #ff9800;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f57c00;
+    }
+
+    .corazonRoto{
+
+    position:fixed;
+
+    top:-80px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    font-size:80px;
+
+    z-index:9999;
+
+    pointer-events:none;
+
+    animation:caerCorazon 1.3s ease-in forwards;
+
+}
+
+@keyframes caerCorazon{
+
+    0%{
+
+        top:-80px;
+        transform:translateX(-50%) rotate(0deg) scale(.6);
+        opacity:1;
+
+    }
+
+    70%{
+
+        top:40%;
+        transform:translateX(-50%) rotate(-20deg) scale(1.3);
+
+    }
+
+    100%{
+
+        top:70%;
+        transform:translateX(-50%) rotate(25deg) scale(.8);
+        opacity:0;
+
+    }
+
+}
+
+.muyBien{
+
+    position:fixed;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%) scale(.3);
+
+    background:linear-gradient(135deg,#ffe082,#ffca28);
+
+    color:#d84315;
+
+    padding:25px 45px;
+
+    border-radius:25px;
+
+    border:5px solid white;
+
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+    font-size:48px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+    z-index:99999;
+
+    opacity:0;
+
+    pointer-events:none;
+
+    animation:animMuyBien 1.5s forwards;
+
+}
+
+@keyframes animMuyBien{
+
+    0%{
+        transform:translate(-50%,-50%) scale(.3) rotate(-15deg);
+        opacity:0;
+    }
+
+    20%{
+        transform:translate(-50%,-50%) scale(1.25) rotate(8deg);
+        opacity:1;
+    }
+
+    35%{
+        transform:translate(-50%,-50%) scale(1);
+    }
+
+    80%{
+        opacity:1;
+    }
+
+    100%{
+        transform:translate(-50%,-50%) scale(.7);
+        opacity:0;
+    }
+
+}
+  </style>
+</head>
+
+<body>
+
+  <div class="panel">
+    <h1>🎈 Globos de Multiplicación ⭐</h1>
+
+    <div class="info">
+      Puntos: <span id="puntos">0</span> |
+      Vidas: <span id="vidas">❤️❤️❤️</span>
+    </div>
+
+    <div class="operacion" id="operacion">3 × 4</div>
+  </div>
+
+  <div id="zonaJuego"></div>
+
+  <div class="mensaje" id="mensaje">Haz clic en la respuesta correcta</div>
+
+  <div class="pantallaFinal" id="pantallaFinal">
+    <h2 id="tituloFinal">🎉 Fin del juego</h2>
+    <p id="resumenFinal"></p>
+    <button onclick="reiniciarJuego()">🔄 Jugar otra vez</button>
+  </div>
+
+  <script>
+    const zonaJuego = document.getElementById("zonaJuego");
+    const operacionTexto = document.getElementById("operacion");
+    const puntosTexto = document.getElementById("puntos");
+    const vidasTexto = document.getElementById("vidas");
+    const mensaje = document.getElementById("mensaje");
+    const pantallaFinal = document.getElementById("pantallaFinal");
+    const tituloFinal = document.getElementById("tituloFinal");
+    const resumenFinal = document.getElementById("resumenFinal");
+
+    const felicitaciones = [
+
+        "🌟<br>¡Muy bien<br>Valentina! ❤️",
+
+        "🥳<br>¡Excelente!<br>Mi hijita linda ❤️",
+
+        "🎉<br>¡Genial!",
+
+        "🏆<br>¡Eres increíble!",
+
+        "⭐<br>¡Lo lograste!<br>Mi Valentinita ❤️",
+
+        "🚀<br>¡Sigue así<br>Mi oshosho ❤️",
+
+        "💖<br>¡Qué inteligente<br>Valentina!",
+
+        "👏<br>¡Perfecto!"
+
+    ];
+
+    let puntos = 0;
+    let vidas = 5;
+    let respuestaCorrecta = 0;
+    let globos = [];
+    let intervaloMovimiento = null;
+    let juegoActivo = true;
+
+    const colores = ["rojo", "azul", "verde", "morado", "naranja"];
+
+    function generarNumero(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function mezclar(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function nuevaRonda() {
+      limpiarGlobos();
+
+      const n1 = generarNumero(1, 9);
+      const n2 = generarNumero(1, 9);
+
+      respuestaCorrecta = n1 * n2;
+      operacionTexto.textContent = n1 + " × " + n2;
+
+      let opciones = [respuestaCorrecta];
+
+      while (opciones.length < 5) {
+        let falsa = respuestaCorrecta + generarNumero(-20, 20);
+
+        if (falsa <= 0) falsa = generarNumero(1, 81);
+
+        if (!opciones.includes(falsa)) {
+          opciones.push(falsa);
+        }
+      }
+
+      opciones = mezclar(opciones);
+
+      opciones.forEach((valor, index) => {
+        crearGlobo(valor, index);
+      });
+
+      mensaje.textContent = "🎯 Encuentra la respuesta correcta";
+    }
+
+    function crearGlobo(valor, index) {
+        const globo = document.createElement("div");
+
+        globo.classList.add("globo");
+        globo.classList.add(colores[index % colores.length]);
+
+        globo.textContent = valor;
+        globo.dataset.valor = valor;
+
+        const anchoPantalla = window.innerWidth;
+        const posicionX = generarNumero(20, Math.max(30, anchoPantalla - 120));
+
+        globo.style.left = posicionX + "px";
+        globo.style.bottom = "-130px";
+
+        globo.velocidadY = generarNumero(1, 2) + puntos * 0.08;
+        globo.velocidadX = generarNumero(-2, 2) || 1;
+
+        globo.onclick = function() {
+            seleccionarGlobo(globo);
+        };
+
+        zonaJuego.appendChild(globo);
+        globos.push(globo);
+    }
+
+    function moverGlobos() {
+        globos.forEach(globo => {
+            let bottom = parseFloat(globo.style.bottom);
+            let left = parseFloat(globo.style.left);
+
+            bottom += globo.velocidadY;
+            left += globo.velocidadX;
+
+            if (left <= 0) {
+            left = 0;
+            globo.velocidadX *= -1;
+            }
+
+            if (left >= window.innerWidth - 100) {
+            left = window.innerWidth - 100;
+            globo.velocidadX *= -1;
+            }
+
+            globo.style.bottom = bottom + "px";
+            globo.style.left = left + "px";
+
+            if (bottom > window.innerHeight) {
+
+                globo.remove();
+
+                globos = globos.filter(g => g !== globo);
+
+                if (Number(globo.dataset.valor) === respuestaCorrecta && juegoActivo) {
+
+                    perderVida("⏰ ¡Se escapó el globo correcto!");
+
+                }
+
+            }
+        });
+
+        detectarChoques();
+    }
+
+    function seleccionarGlobo(globo) {
+      if (!juegoActivo) return;
+
+      const valor = Number(globo.dataset.valor);
+
+      if (valor === respuestaCorrecta) {
+        mostrarMuyBien();
+        puntos++;
+        puntosTexto.textContent = puntos;
+        mensaje.textContent = "✅ ¡Correcto!";
+
+        mostrarExplosion(globo);
+
+        if (puntos >= 10) {
+          ganarJuego();
+          return;
+        }
+        limpiarGlobos();
+        setTimeout(nuevaRonda, 2000);
+
+      } else {
+        mensaje.textContent = "❌ Ese no era";
+        mostrarExplosion(globo);
+        perderVida("❌ Respuesta incorrecta");
+      }
+    }
+
+    function perderVida(texto) {        
+
+        if (!juegoActivo) return;
+        mostrarCorazonRoto();
+
+        vidas--;
+
+        actualizarVidas();
+
+        mensaje.textContent = texto;
+
+        if (vidas <= 0) {
+
+            terminarJuego();
+
+        } else {
+
+            limpiarGlobos();
+
+            setTimeout(() => {
+
+                nuevaRonda();
+
+            }, 2000);
+
+        }
+
+    }
+
+    function actualizarVidas() {
+
+        vidasTexto.textContent = "";
+
+        for(let i=0;i<vidas;i++){
+
+            vidasTexto.textContent += "❤️";
+
+        }
+
+    }
+
+    function mostrarExplosion(globo) {
+      const explosion = document.createElement("div");
+      explosion.classList.add("explosion");
+      explosion.textContent = "💥";
+
+      explosion.style.left = globo.style.left;
+      explosion.style.bottom = globo.style.bottom;
+
+      zonaJuego.appendChild(explosion);
+
+      globo.remove();
+
+      setTimeout(() => {
+        explosion.remove();
+      }, 500);
+    }
+
+    function limpiarGlobos() {
+      globos.forEach(globo => globo.remove());
+      globos = [];
+    }
+
+    function terminarJuego() {
+      juegoActivo = false;
+      limpiarGlobos();
+
+      tituloFinal.textContent = "😅 Fin del juego";
+      resumenFinal.textContent = "Lograste " + puntos + " puntos.";
+      pantallaFinal.style.display = "flex";
+    }
+
+    function ganarJuego() {
+      juegoActivo = false;
+      limpiarGlobos();
+
+      tituloFinal.textContent = "🏆 ¡Ganaste!";
+      resumenFinal.textContent = "Conseguiste 10 puntos.";
+      pantallaFinal.style.display = "flex";
+    }
+
+    function reiniciarJuego() {
+      puntos = 0;
+      vidas = 5;
+      juegoActivo = true;
+
+      puntosTexto.textContent = puntos;
+      actualizarVidas();
+
+      pantallaFinal.style.display = "none";
+
+      nuevaRonda();
+    }
+
+    function detectarChoques() {
+        for (let i = 0; i < globos.length; i++) {
+            for (let j = i + 1; j < globos.length; j++) {
+            const a = globos[i];
+            const b = globos[j];
+
+            const ax = parseFloat(a.style.left) + 47;
+            const ay = parseFloat(a.style.bottom) + 57;
+            const bx = parseFloat(b.style.left) + 47;
+            const by = parseFloat(b.style.bottom) + 57;
+
+            const dx = bx - ax;
+            const dy = by - ay;
+            const distancia = Math.sqrt(dx * dx + dy * dy);
+
+            const distanciaMinima = 95;
+
+            if (distancia < distanciaMinima && distancia > 0) {
+                const empujeX = dx / distancia;
+                const empujeY = dy / distancia;
+
+                const solapamiento = distanciaMinima - distancia;
+
+                let leftA = parseFloat(a.style.left);
+                let bottomA = parseFloat(a.style.bottom);
+                let leftB = parseFloat(b.style.left);
+                let bottomB = parseFloat(b.style.bottom);
+
+                leftA -= empujeX * solapamiento / 2;
+                bottomA -= empujeY * solapamiento / 2;
+                leftB += empujeX * solapamiento / 2;
+                bottomB += empujeY * solapamiento / 2;
+
+                a.style.left = leftA + "px";
+                a.style.bottom = bottomA + "px";
+                b.style.left = leftB + "px";
+                b.style.bottom = bottomB + "px";
+
+                const tempX = a.velocidadX;
+                a.velocidadX = b.velocidadX;
+                b.velocidadX = tempX;
+            }
+            }
+        }
+    }
+
+    function mostrarCorazonRoto(){
+
+        const corazon=document.createElement("div");
+
+        corazon.className="corazonRoto";
+
+        corazon.textContent="💔";
+
+        document.body.appendChild(corazon);
+
+        setTimeout(function(){
+
+            corazon.remove();
+
+        },1300);
+
+    }
+
+    function mostrarMuyBien(){
+
+        const cartel=document.createElement("div");
+
+        cartel.className="muyBien";
+
+        cartel.innerHTML = felicitaciones[Math.floor(Math.random()*felicitaciones.length)];
+
+        //cartel.innerHTML="🌟<br>¡Muy bien<br>Valentina! ❤️";
+
+        document.body.appendChild(cartel);
+
+        setTimeout(function(){
+
+            cartel.remove();
+
+        },1500);
+
+    }
+
+    intervaloMovimiento = setInterval(moverGlobos, 20);
+
+    reiniciarJuego();
+  </script>
+
+</body>
+</html>
