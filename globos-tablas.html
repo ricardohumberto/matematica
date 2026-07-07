@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Globos de Multiplicación</title> 
+  <title>Globos de Multiplicación</title>
 
   <style>
-    body { 
+    body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: linear-gradient(#87ceeb, #fff8dc);
@@ -263,6 +263,43 @@
     }
 
 }
+.pantallaRespuesta{
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:99998;
+    text-align:center;
+    padding:20px;
+}
+
+.cajaRespuesta{
+    background:white;
+    border-radius:28px;
+    padding:35px 45px;
+    box-shadow:0 12px 35px rgba(0,0,0,.35);
+    border:6px solid #ff9800;
+}
+
+.cajaRespuesta h2{
+    font-size:38px;
+    color:#d84315;
+    margin:0 0 20px;
+}
+
+.cajaRespuesta .operacionError{
+    font-size:56px;
+    font-weight:bold;
+    color:#333;
+    margin:20px 0;
+}
+
+.cajaRespuesta button{
+    margin-top:20px;
+}
   </style>
 </head>
 
@@ -289,6 +326,15 @@
     <button onclick="reiniciarJuego()">🔄 Jugar otra vez</button>
   </div>
 
+
+    <div class="pantallaRespuesta" id="pantallaRespuesta">
+    <div class="cajaRespuesta">
+        <h2>❌ Repasemos</h2>
+        <div class="operacionError" id="textoRespuestaCorrecta"></div>
+        <button onclick="continuarDespuesError()">➡️ Continuar</button>
+    </div>
+    </div>
+
   <script>
     const zonaJuego = document.getElementById("zonaJuego");
     const operacionTexto = document.getElementById("operacion");
@@ -298,6 +344,8 @@
     const pantallaFinal = document.getElementById("pantallaFinal");
     const tituloFinal = document.getElementById("tituloFinal");
     const resumenFinal = document.getElementById("resumenFinal");
+    const pantallaRespuesta = document.getElementById("pantallaRespuesta");
+    const textoRespuestaCorrecta = document.getElementById("textoRespuestaCorrecta");
 
     const felicitaciones = [
 
@@ -326,6 +374,9 @@
     let intervaloMovimiento = null;
     let juegoActivo = true;
 
+    let numero1Actual = 0;
+    let numero2Actual = 0;
+
     const colores = ["rojo", "azul", "verde", "morado", "naranja"];
 
     function generarNumero(min, max) {
@@ -343,8 +394,11 @@
     function nuevaRonda() {
       limpiarGlobos();
 
-      const n1 = generarNumero(1, 9);
-      const n2 = generarNumero(1, 9);
+        numero1Actual = generarNumero(1, 9);
+        numero2Actual = generarNumero(1, 9);
+
+        const n1 = numero1Actual;
+        const n2 = numero2Actual;
 
       respuestaCorrecta = n1 * n2;
       operacionTexto.textContent = n1 + " × " + n2;
@@ -465,6 +519,7 @@
     function perderVida(texto) {        
 
         if (!juegoActivo) return;
+
         mostrarCorazonRoto();
 
         vidas--;
@@ -473,22 +528,7 @@
 
         mensaje.textContent = texto;
 
-        if (vidas <= 0) {
-
-            terminarJuego();
-
-        } else {
-
-            limpiarGlobos();
-
-            setTimeout(() => {
-
-                nuevaRonda();
-
-            }, 2000);
-
-        }
-
+        mostrarRespuestaCorrecta();
     }
 
     function actualizarVidas() {
@@ -638,6 +678,25 @@
 
         },1500);
 
+    }
+
+    function mostrarRespuestaCorrecta() {
+        limpiarGlobos();
+
+        textoRespuestaCorrecta.innerHTML =
+            numero1Actual + " × " + numero2Actual + " = <span style='color:#2e7d32'>" + respuestaCorrecta + "</span>";
+
+        pantallaRespuesta.style.display = "flex";
+    }
+
+    function continuarDespuesError() {
+        pantallaRespuesta.style.display = "none";
+
+        if (vidas <= 0) {
+            terminarJuego();
+        } else {
+            nuevaRonda();
+        }
     }
 
     intervaloMovimiento = setInterval(moverGlobos, 20);
