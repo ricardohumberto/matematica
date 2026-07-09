@@ -300,10 +300,64 @@
 .cajaRespuesta button{
     margin-top:20px;
 }
+.pantallaMenu{
+    position:fixed;
+    inset:0;
+    background:linear-gradient(#87ceeb,#fff8dc);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:100000;
+    padding:20px;
+}
+
+.menuCaja{
+    background:white;
+    border-radius:30px;
+    padding:35px;
+    box-shadow:0 12px 35px rgba(0,0,0,.35);
+    max-width:650px;
+}
+
+.menuCaja h1{
+    font-size:38px;
+}
+
+.botonesTabla{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+    margin-top:25px;
+}
+
+.botonesTabla button{
+    font-size:28px;
+    padding:18px;
+}
   </style>
 </head>
 
 <body>
+
+  <div class="pantallaMenu" id="pantallaMenu">
+  <div class="menuCaja">
+    <h1>🎈 Elige una tabla</h1>
+    <p style="font-size:24px;font-weight:bold;">¿Qué tabla quieres practicar?</p>
+
+    <div class="botonesTabla">
+      <button onclick="elegirTabla(1)">Tabla del 1</button>
+      <button onclick="elegirTabla(2)">Tabla del 2</button>
+      <button onclick="elegirTabla(3)">Tabla del 3</button>
+      <button onclick="elegirTabla(4)">Tabla del 4</button>
+      <button onclick="elegirTabla(5)">Tabla del 5</button>
+      <button onclick="elegirTabla(6)">Tabla del 6</button>
+      <button onclick="elegirTabla(7)">Tabla del 7</button>
+      <button onclick="elegirTabla(8)">Tabla del 8</button>
+      <button onclick="elegirTabla(9)">Tabla del 9</button>
+    </div>
+  </div>
+</div>
 
   <div class="panel">
     <h1>🎈 Globos de Multiplicación ⭐</h1>
@@ -347,6 +401,8 @@
     const pantallaRespuesta = document.getElementById("pantallaRespuesta");
     const textoRespuestaCorrecta = document.getElementById("textoRespuestaCorrecta");
 
+    const pantallaMenu = document.getElementById("pantallaMenu");
+
     const felicitaciones = [
 
         "🌟<br>¡Muy bien<br>Valentina! ❤️",
@@ -376,6 +432,8 @@
 
     let numero1Actual = 0;
     let numero2Actual = 0;
+    
+    let tablaElegida = null;
 
     const colores = ["rojo", "azul", "verde", "morado", "naranja"];
 
@@ -394,7 +452,7 @@
     function nuevaRonda() {
       limpiarGlobos();
 
-        numero1Actual = generarNumero(6, 6);
+        numero1Actual = tablaElegida;
         numero2Actual = generarNumero(2, 9);
 
         const n1 = numero1Actual;
@@ -699,9 +757,15 @@
         }
     }
 
-    intervaloMovimiento = setInterval(moverGlobos, 20);
-
+    function elegirTabla(tabla) {
+    tablaElegida = tabla;
+    pantallaMenu.style.display = "none";
     reiniciarJuego();
+}
+
+intervaloMovimiento = setInterval(moverGlobos, 20);
+
+// No iniciamos el juego hasta elegir una tabla
   </script>
 
 </body>
