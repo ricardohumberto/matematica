@@ -346,7 +346,7 @@
     <p style="font-size:24px;font-weight:bold;">¿Qué tabla quieres practicar?</p>
 
     <div class="botonesTabla">
-      <button onclick="elegirTabla(1)">Tabla del 1</button>
+      <button onclick="elegirTabla(0)">🎲 Todas</button>
       <button onclick="elegirTabla(2)">Tabla del 2</button>
       <button onclick="elegirTabla(3)">Tabla del 3</button>
       <button onclick="elegirTabla(4)">Tabla del 4</button>
@@ -452,8 +452,17 @@
     function nuevaRonda() {
       limpiarGlobos();
 
-        numero1Actual = tablaElegida;
-        numero2Actual = generarNumero(2, 9);
+        if(tablaElegida == 0){
+
+            numero1Actual = generarNumero(2,9);
+            numero2Actual = generarNumero(2,9);
+
+        }else{
+
+            numero1Actual = tablaElegida;
+            numero2Actual = generarNumero(2,9);
+
+        }
 
         const n1 = numero1Actual;
         const n2 = numero2Actual;
