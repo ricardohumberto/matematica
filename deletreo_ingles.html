@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Aprender palabras en inglés</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #87ceeb, #fff3c4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .contenedor {
+      width: 100%;
+      max-width: 650px;
+      background: white;
+      border-radius: 25px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      margin-top: 0;
+      color: #37474f;
+      font-size: 32px;
+    }
+
+    .progreso {
+      font-size: 18px;
+      color: #607d8b;
+      margin-bottom: 20px;
+    }
+
+    .tarjeta {
+      min-height: 250px;
+      background: #f5f9ff;
+      border: 4px solid #64b5f6;
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 25px;
+      margin-bottom: 25px;
+    }
+
+    .palabra {
+      font-size: clamp(45px, 10vw, 80px);
+      font-weight: bold;
+      color: #1565c0;
+      word-break: break-word;
+    }
+
+    .traduccion {
+      margin-top: 15px;
+      font-size: 25px;
+      color: #455a64;
+    }
+
+    .deletreo-visual {
+      min-height: 40px;
+      margin-top: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ff6f00;
+      letter-spacing: 6px;
+    }
+
+    .botones-sonido,
+    .navegacion {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    button {
+      border: none;
+      border-radius: 14px;
+      padding: 14px 22px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+    }
+
+    button:hover {
+      transform: scale(1.04);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      transform: none;
+    }
+
+    .pronunciar {
+      background: #42a5f5;
+      color: white;
+    }
+
+    .deletrear {
+      background: #ff9800;
+      color: white;
+    }
+
+    .anterior {
+      background: #78909c;
+      color: white;
+    }
+
+    .siguiente {
+      background: #43a047;
+      color: white;
+    }
+
+    .automatico {
+      background: #7e57c2;
+      color: white;
+    }
+
+    .automatico.activo {
+      background: #d32f2f;
+    }
+
+    .configuracion {
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 2px solid #eceff1;
+    }
+
+    .configuracion label {
+      display: block;
+      margin-bottom: 8px;
+      color: #455a64;
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      max-width: 300px;
+    }
+
+    .mensaje {
+      min-height: 25px;
+      margin-top: 15px;
+      font-size: 17px;
+      color: #546e7a;
+    }
+
+    @media (max-width: 500px) {
+      .contenedor {
+        padding: 20px 15px;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+    }
+
+    select {
+  width: 100%;
+  max-width: 350px;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 2px solid #90caf9;
+  border-radius: 10px;
+  font-size: 16px;
+  background: white;
+}
+  </style>
+</head>
+
+<body>
+
+  <main class="contenedor">
+
+    <h1>🔊 Palabras en inglés</h1>
+
+    <div class="progreso" id="progreso"></div>
+
+    <section class="tarjeta">
+
+      <div class="palabra" id="palabra"></div>
+
+      <div class="traduccion" id="traduccion"></div>
+
+      <div class="deletreo-visual" id="deletreoVisual"></div>
+
+    </section>
+
+    <div class="botones-sonido">
+
+      <button class="pronunciar" id="btnPronunciar">
+        🔊 Pronunciar
+      </button>
+
+      <button class="deletrear" id="btnDeletrear">
+        🔤 Deletrear
+      </button>
+
+    </div>
+
+    <div class="navegacion">
+
+      <button class="anterior" id="btnAnterior">
+        ⬅ Anterior
+      </button>
+
+      <button class="siguiente" id="btnSiguiente">
+        Siguiente ➡
+      </button>
+
+      <button class="automatico" id="btnAutomatico">
+        ▶ Modo automático
+      </button>
+
+    </div>
+
+    <div class="mensaje" id="mensaje"></div>
+
+    <div class="configuracion">
+
+  <label for="selectorVoz">Voz en inglés:</label>
+
+  <select id="selectorVoz"></select>
+
+  <label for="velocidad">
+    Velocidad de pronunciación:
+    <span id="valorVelocidad">0.8</span>
+  </label>
+
+  <input
+    type="range"
+    id="velocidad"
+    min="0.5"
+    max="1.2"
+    value="0.8"
+    step="0.1"
+  >
+
+</div>
+
+  </main>
+
+  <script>
+    /*
+      Agrega o modifica aquí las palabras.
+
+      palabra: palabra en inglés
+      traduccion: significado en español
+    */
+    const palabras = [
+      { palabra: "apple", traduccion: "manzana" },
+      { palabra: "banana", traduccion: "plátano" },
+      { palabra: "house", traduccion: "casa" },
+      { palabra: "school", traduccion: "colegio" },
+      { palabra: "family", traduccion: "familia" },
+      { palabra: "friend", traduccion: "amigo o amiga" },
+      { palabra: "water", traduccion: "agua" },
+      { palabra: "beautiful", traduccion: "hermoso o hermosa" },
+      { palabra: "elephant", traduccion: "elefante" },
+      { palabra: "butterfly", traduccion: "mariposa" },
+      { palabra: "computer", traduccion: "computadora" },
+      { palabra: "window", traduccion: "ventana" }
+    ];
+
+    let indiceActual = 0;
+    let velocidad = 0.8;
+    let modoAutomatico = false;
+    let temporizadorAutomatico = null;
+
+    const palabraElemento = document.getElementById("palabra");
+    const traduccionElemento = document.getElementById("traduccion");
+    const progresoElemento = document.getElementById("progreso");
+    const deletreoVisual = document.getElementById("deletreoVisual");
+    const mensajeElemento = document.getElementById("mensaje");
+
+    const btnPronunciar = document.getElementById("btnPronunciar");
+    const btnDeletrear = document.getElementById("btnDeletrear");
+    const btnAnterior = document.getElementById("btnAnterior");
+    const btnSiguiente = document.getElementById("btnSiguiente");
+    const btnAutomatico = document.getElementById("btnAutomatico");
+
+    const controlVelocidad = document.getElementById("velocidad");
+    const valorVelocidad = document.getElementById("valorVelocidad");
+
+    let vocesDisponibles = [];
+let vozSeleccionada = null;
+
+const selectorVoz = document.getElementById("selectorVoz");
+
+function cargarVoces() {
+  const todasLasVoces = window.speechSynthesis.getVoices();
+
+  vocesDisponibles = todasLasVoces.filter(
+    voz => voz.lang && voz.lang.toLowerCase().startsWith("en")
+  );
+
+  selectorVoz.innerHTML = "";
+
+  vocesDisponibles.forEach((voz, indice) => {
+    const opcion = document.createElement("option");
+
+    opcion.value = indice;
+    opcion.textContent = `${voz.name} — ${voz.lang}`;
+
+    selectorVoz.appendChild(opcion);
+  });
+
+  /*
+    Intenta elegir primero una voz estadounidense
+    de mejor calidad.
+  */
+  let indiceRecomendado = vocesDisponibles.findIndex(voz => {
+    const nombre = voz.name.toLowerCase();
+
+    return (
+      voz.lang === "en-US" &&
+      (
+        nombre.includes("samantha") ||
+        nombre.includes("ava") ||
+        nombre.includes("zira") ||
+        nombre.includes("aria") ||
+        nombre.includes("google")
+      )
+    );
+  });
+
+  if (indiceRecomendado === -1) {
+    indiceRecomendado = vocesDisponibles.findIndex(
+      voz => voz.lang === "en-US"
+    );
+  }
+
+  if (indiceRecomendado === -1) {
+    indiceRecomendado = 0;
+  }
+
+  if (vocesDisponibles.length > 0) {
+    selectorVoz.value = indiceRecomendado;
+    vozSeleccionada = vocesDisponibles[indiceRecomendado];
+  } else {
+    const opcion = document.createElement("option");
+    opcion.textContent = "No se encontraron voces en inglés";
+    selectorVoz.appendChild(opcion);
+  }
+}
+
+selectorVoz.addEventListener("change", () => {
+  const indice = Number(selectorVoz.value);
+  vozSeleccionada = vocesDisponibles[indice];
+
+  pronunciarPalabra();
+});
+
+window.speechSynthesis.onvoiceschanged = cargarVoces;
+
+cargarVoces();
+
+    /*
+      Busca preferentemente una voz en inglés estadounidense.
+    */
+  
+
+    function detenerVoz() {
+      window.speechSynthesis.cancel();
+    }
+
+    function hablar(texto, opciones = {}) {
+      return new Promise(resolve => {
+        detenerVoz();
+
+        const mensaje = new SpeechSynthesisUtterance(texto);
+        
+
+        mensaje.lang = "en-US";
+        mensaje.rate = opciones.velocidad ?? velocidad;
+        mensaje.pitch = opciones.tono ?? 1;
+        mensaje.volume = 1;
+
+        if (vozSeleccionada) {
+    mensaje.voice = vozSeleccionada;
+    mensaje.lang = vozSeleccionada.lang;
+} else {
+    mensaje.lang = "en-US";
+}
+
+        mensaje.onend = resolve;
+        mensaje.onerror = resolve;
+
+        window.speechSynthesis.speak(mensaje);
+      });
+    }
+
+    function mostrarPalabra(reproducirAutomaticamente = true) {
+      detenerVoz();
+      detenerTemporizador();
+
+      const elemento = palabras[indiceActual];
+
+      palabraElemento.textContent = elemento.palabra;
+      traduccionElemento.textContent = elemento.traduccion;
+      progresoElemento.textContent =
+        `Palabra ${indiceActual + 1} de ${palabras.length}`;
+
+      deletreoVisual.textContent = "";
+      mensajeElemento.textContent = "";
+
+      btnAnterior.disabled = indiceActual === 0;
+      btnSiguiente.disabled = indiceActual === palabras.length - 1;
+
+      if (reproducirAutomaticamente) {
+        setTimeout(() => {
+          pronunciarPalabra();
+        }, 400);
+      }
+    }
+
+    async function pronunciarPalabra() {
+      const palabra = palabras[indiceActual].palabra;
+
+      mensajeElemento.textContent = "Escucha la pronunciación…";
+      deletreoVisual.textContent = "";
+
+      await hablar(palabra);
+
+      mensajeElemento.textContent = "";
+    }
+
+    async function deletrearPalabra() {
+      detenerTemporizador();
+
+      const palabra = palabras[indiceActual].palabra.toUpperCase();
+      const letras = palabra.split("");
+
+      /*
+        Las comas hacen que el sintetizador deje una pequeña pausa
+        entre cada letra.
+      */
+      const textoDeletreo = letras.join(", ");
+
+      deletreoVisual.textContent = letras.join(" - ");
+      mensajeElemento.textContent = "Escucha el deletreo…";
+
+      await hablar(textoDeletreo, {
+        velocidad: Math.max(0.5, velocidad - 0.15)
+      });
+
+      mensajeElemento.textContent = "";
+
+      if (modoAutomatico) {
+        programarSiguiente();
+      }
+    }
+
+    function siguientePalabra() {
+      if (indiceActual < palabras.length - 1) {
+        indiceActual++;
+        mostrarPalabra(true);
+      }
+    }
+
+    function palabraAnterior() {
+      if (indiceActual > 0) {
+        indiceActual--;
+        mostrarPalabra(true);
+      }
+    }
+
+    async function ejecutarPalabraAutomatica() {
+      if (!modoAutomatico) {
+        return;
+      }
+
+      const palabra = palabras[indiceActual].palabra;
+      const letras = palabra.toUpperCase().split("");
+
+      mensajeElemento.textContent = "Pronunciación…";
+      deletreoVisual.textContent = "";
+
+      await hablar(palabra);
+
+      if (!modoAutomatico) {
+        return;
+      }
+
+      await esperar(800);
+
+      deletreoVisual.textContent = letras.join(" - ");
+      mensajeElemento.textContent = "Deletreo…";
+
+      await hablar(letras.join(", "), {
+        velocidad: Math.max(0.5, velocidad - 0.15)
+      });
+
+      if (!modoAutomatico) {
+        return;
+      }
+
+      mensajeElemento.textContent = "";
+
+      programarSiguiente();
+    }
+
+    function programarSiguiente() {
+      detenerTemporizador();
+
+      temporizadorAutomatico = setTimeout(() => {
+        if (!modoAutomatico) {
+          return;
+        }
+
+        if (indiceActual < palabras.length - 1) {
+          indiceActual++;
+        } else {
+          indiceActual = 0;
+        }
+
+        mostrarPalabra(false);
+        ejecutarPalabraAutomatica();
+      }, 1800);
+    }
+
+    function esperar(milisegundos) {
+      return new Promise(resolve => {
+        setTimeout(resolve, milisegundos);
+      });
+    }
+
+    function detenerTemporizador() {
+      if (temporizadorAutomatico) {
+        clearTimeout(temporizadorAutomatico);
+        temporizadorAutomatico = null;
+      }
+    }
+
+    function alternarModoAutomatico() {
+      modoAutomatico = !modoAutomatico;
+
+      if (modoAutomatico) {
+        btnAutomatico.textContent = "⏹ Detener automático";
+        btnAutomatico.classList.add("activo");
+
+        ejecutarPalabraAutomatica();
+      } else {
+        btnAutomatico.textContent = "▶ Modo automático";
+        btnAutomatico.classList.remove("activo");
+
+        detenerTemporizador();
+        detenerVoz();
+
+        mensajeElemento.textContent = "Modo automático detenido.";
+      }
+    }
+
+    btnPronunciar.addEventListener("click", () => {
+      detenerTemporizador();
+      pronunciarPalabra();
+    });
+
+    btnDeletrear.addEventListener("click", () => {
+      deletrearPalabra();
+    });
+
+    btnAnterior.addEventListener("click", palabraAnterior);
+    btnSiguiente.addEventListener("click", siguientePalabra);
+    btnAutomatico.addEventListener("click", alternarModoAutomatico);
+
+    controlVelocidad.addEventListener("input", evento => {
+      velocidad = Number(evento.target.value);
+      valorVelocidad.textContent = velocidad.toFixed(1);
+    });
+
+    /*
+      Algunos navegadores cargan las voces unos instantes después
+      de abrir la página.
+    */
+    window.speechSynthesis.onvoiceschanged = cargarVoces;
+
+cargarVoces();
+
+mostrarPalabra(true);
+  </script>
+
+</body>
+</html>
